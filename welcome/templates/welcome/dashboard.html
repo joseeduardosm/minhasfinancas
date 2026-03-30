@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Minhas Financas</title>
+    <link rel="stylesheet" href="{% static 'welcome/css/dashboard.css' %}">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="/welcome/">MINHAS FINANCAS</a>
+            <a class="logout-link" href="/accounts/logout/">Sair</a>
+        </div>
+    </header>
+
+    <main class="dashboard-shell">
+        <section class="sidebar-card">
+            <h2>Saldo do Mes</h2>
+            <div class="saldo-item">
+                <span class="label">Planejado</span>
+                <strong class="valor">{{ dados.saldo.planejado_brl }}</strong>
+            </div>
+            <div class="saldo-item">
+                <span class="label">Executado</span>
+                <strong class="valor">{{ dados.saldo.executado_brl }}</strong>
+            </div>
+
+            <!-- Bloco de receitas com detalhamento planejado/executado. -->
+            <a class="tipo-card receitas" href="{% url 'welcome:event_list' 'receita' %}?year={{ year }}&month={{ month }}">
+                <h3>Receitas</h3>
+                <p><span>Planejada:</span> <strong>{{ dados.resumo_tipos.receitas.planejada_brl }}</strong></p>
+                <p><span>Executada:</span> <strong>{{ dados.resumo_tipos.receitas.executada_brl }}</strong></p>
+            </a>
+
+            <!-- Bloco de despesas com detalhamento planejado/executado. -->
+            <a class="tipo-card despesas" href="{% url 'welcome:event_list' 'despesa' %}?year={{ year }}&month={{ month }}">
+                <h3>Despesas</h3>
+                <p><span>Planejada:</span> <strong>{{ dados.resumo_tipos.despesas.planejada_brl }}</strong></p>
+                <p><span>Executada:</span> <strong>{{ dados.resumo_tipos.despesas.executada_brl }}</strong></p>
+            </a>
+        </section>
+
+        <section class="chart-card">
+            <div class="chart-head">
+                <h1>Dashboard Financeira Mensal</h1>
+                <div class="month-nav">
+                    <a href="?year={{ prev_year }}&month={{ prev_month }}">&lsaquo; Mes anterior</a>
+                    <strong>{{ month|stringformat:"02d" }}/{{ year }}</strong>
+                    <a href="?year={{ next_year }}&month={{ next_month }}">Proximo mes &rsaquo;</a>
+                </div>
+            </div>
+
+            <div id="finance-chart" class="chart-box"></div>
+            <p class="hint">Clique em um ponto do grafico para abrir o calendario do mes.</p>
+        </section>
+    </main>
+
+    {% if messages %}
+        <section class="messages-wrap">
+            {% for message in messages %}
+                <div class="msg {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    {{ dados|json_script:"monthly-data" }}
+    <script src="{% static 'welcome/js/dashboard.js' %}"></script>
+</body>
+</html>

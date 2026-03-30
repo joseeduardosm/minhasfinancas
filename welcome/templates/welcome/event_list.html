@@ -1,0 +1,180 @@
+{% load static l10n %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo_tipo }} | Minhas Financas</title>
+    <link rel="stylesheet" href="{% static 'welcome/css/event_list.css' %}">
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="/welcome/">MINHAS FINANCAS</a>
+            <a class="back-link" href="/welcome/?year={{ year }}&month={{ month }}">Voltar para dashboard</a>
+        </div>
+    </header>
+
+    <main class="list-shell">
+        {% if messages %}
+            <section class="messages-wrap">
+                {% for message in messages %}
+                    <div class="msg {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </section>
+        {% endif %}
+
+        <section class="list-card">
+            <div class="list-head">
+                <h1>{{ titulo_tipo }} - {{ month|stringformat:"02d" }}/{{ year }}</h1>
+                <div class="month-nav">
+                    <a href="?year={{ prev_year }}&month={{ prev_month }}&sort={{ sort }}&dir={{ dir }}&q={{ q|urlencode }}">&lsaquo; Mes anterior</a>
+                    <a href="?year={{ next_year }}&month={{ next_month }}&sort={{ sort }}&dir={{ dir }}&q={{ q|urlencode }}">Proximo mes &rsaquo;</a>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <form class="search-form" method="get">
+                    <input type="hidden" name="year" value="{{ year }}">
+                    <input type="hidden" name="month" value="{{ month }}">
+                    <input type="hidden" name="sort" value="{{ sort }}">
+                    <input type="hidden" name="dir" value="{{ dir }}">
+                    <label for="q" class="search-label">Pesquisar</label>
+                    <input id="q" class="search-input" type="text" name="q" value="{{ q }}" placeholder="Data, nome ou valor">
+                    <button class="btn secondary" type="submit">Lupa</button>
+                </form>
+
+                <button id="open-create-modal" class="btn primary create-trigger" type="button">
+                    Lancar {{ titulo_tipo|slice:":-1" }}
+                </button>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>
+                                <a href="?year={{ year }}&month={{ month }}&sort=data&dir={% if sort == 'data' and dir == 'asc' %}desc{% else %}asc{% endif %}&q={{ q|urlencode }}">
+                                    Data
+                                </a>
+                            </th>
+                            <th>
+                                <a href="?year={{ year }}&month={{ month }}&sort=nome&dir={% if sort == 'nome' and dir == 'asc' %}desc{% else %}asc{% endif %}&q={{ q|urlencode }}">
+                                    Nome
+                                </a>
+                            </th>
+                            <th>
+                                <a href="?year={{ year }}&month={{ month }}&sort=valor&dir={% if sort == 'valor' and dir == 'asc' %}desc{% else %}asc{% endif %}&q={{ q|urlencode }}">
+                                    Valor
+                                </a>
+                            </th>
+                            <th>Status</th>
+                            <th>Acoes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for evento in eventos %}
+                            <tr>
+                                <td>{{ evento.data_br }}</td>
+                                <td>{{ evento.nome }}</td>
+                                <td>{{ evento.valor|floatformat:2 }}</td>
+                                <td>{{ evento.status }}</td>
+                                <td class="actions-col">
+                                    <div class="row-actions">
+                                        <button class="action-trigger" type="button" aria-label="Acoes">&#128077;</button>
+                                        <div class="action-popover">
+                                            <span class="legend">Executar evento</span>
+                                            <form method="post" action="{% url 'welcome:execute_entry' evento.id %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="year" value="{{ year }}">
+                                                <input type="hidden" name="month" value="{{ month }}">
+                                                <input type="hidden" name="day" value="{{ evento.data_obj.day }}">
+                                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                <button class="mini-btn exec" type="submit">&#128077;</button>
+                                            </form>
+
+                                            <a class="mini-btn edit" href="{% url 'welcome:edit_entry' evento.id %}?year={{ year }}&month={{ month }}&day={{ evento.data_obj.day }}&next={{ request.get_full_path|urlencode }}">...</a>
+
+                                            <form class="delete-scope-form" method="post" action="{% url 'welcome:delete_entry' evento.id %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="year" value="{{ year }}">
+                                                <input type="hidden" name="month" value="{{ month }}">
+                                                <input type="hidden" name="day" value="{{ evento.data_obj.day }}">
+                                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                <input type="hidden" name="occurrence_date" value="{{ evento.data }}">
+                                                <input type="hidden" name="delete_scope" value="all">
+                                                <input type="hidden" name="is_recurring" value="{% if evento.is_recorrente %}1{% else %}0{% endif %}">
+                                                <button class="mini-btn del" type="submit">x</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="empty">Nenhum evento encontrado para os filtros informados.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div id="create-modal" class="create-modal" hidden>
+        <div class="create-modal-card">
+            <button id="close-create-modal" class="create-modal-close" type="button" aria-label="Fechar">&times;</button>
+            <h2>Lancar {{ titulo_tipo|slice:":-1" }}</h2>
+            <form method="post" action="{% url 'welcome:create_entry' %}" class="create-form">
+                {% csrf_token %}
+                <input type="hidden" name="tipo" value="{{ tipo }}">
+                <input type="hidden" name="year" value="{{ year }}">
+                <input type="hidden" name="month" value="{{ month }}">
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+                <label for="nome">Nome</label>
+                <input id="nome" name="nome" type="text" maxlength="120" required>
+
+                <label for="valor">Valor</label>
+                <input id="valor" name="valor" type="number" min="0.01" step="0.01" required>
+
+                <label for="data_base">Data</label>
+                <input id="data_base" name="data_base" type="date" value="{{ year }}-{{ month|stringformat:'02d' }}-01" required>
+
+                <label class="toggle-recorrencia">
+                    <input id="is_recorrente" name="is_recorrente" type="checkbox" value="1">
+                    Evento recorrente
+                </label>
+
+                <div class="recorrencia-fields" hidden>
+                    <label for="recorrencia">Recorrencia</label>
+                    <select id="recorrencia" name="recorrencia" data-recorrencia-field>
+                        <option value="DIARIA">Diaria</option>
+                        <option value="SEMANAL">Semanal</option>
+                        <option value="QUINZENAL">Quinzenal</option>
+                        <option value="MENSAL" selected>Mensal</option>
+                        <option value="TRIMESTRAL">Trimestral</option>
+                        <option value="SEMESTRAL">Semestral</option>
+                        <option value="ANUAL">Anual</option>
+                    </select>
+
+                    <label for="data_fim_recorrencia">Data fim da recorrencia</label>
+                    <input id="data_fim_recorrencia" name="data_fim_recorrencia" type="date" data-recorrencia-field>
+                </div>
+
+                <label for="status">Status</label>
+                <select id="status" name="status" required>
+                    <option value="PLANEJADO">Planejado</option>
+                    <option value="EXECUTADO">Executado</option>
+                </select>
+
+                <button class="btn primary" type="submit">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{% static 'welcome/js/event_list.js' %}"></script>
+    <script src="{% static 'welcome/js/delete_scope.js' %}"></script>
+    <script src="{% static 'welcome/js/recorrencia_toggle.js' %}"></script>
+</body>
+</html>

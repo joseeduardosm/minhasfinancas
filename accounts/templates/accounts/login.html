@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Minhas Financas</title>
+    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}">
+</head>
+<body>
+    <!-- Barra superior inspirada no visual do Yu-Gi-Oh DB. -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <strong class="brand">MINHAS FINANCAS</strong>
+            
+        </div>
+    </header>
+
+    <main class="login-shell">
+        <section class="login-card">
+            <h1>Entrar</h1>
+            <p class="subtitle">Acesse sua conta para controlar seu deck de gastos.</p>
+
+            <!-- Formulario de login local (usuario e senha). -->
+            <form method="post" class="login-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="error-box">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <label for="id_username">Usuario</label>
+                <input id="id_username" type="text" name="username" required>
+
+                <label for="id_password">Senha</label>
+                <input id="id_password" type="password" name="password" required>
+
+                <button type="submit" class="btn-primary">Entrar</button>
+            </form>
+
+            <p class="signup-tip">
+                Nao tem conta?
+                <a href="{% url 'accounts:signup' %}">Criar usuario novo</a>
+            </p>
+        </section>
+    </main>
+</body>
+</html>

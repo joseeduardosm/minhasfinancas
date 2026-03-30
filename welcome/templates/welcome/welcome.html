@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seja bem vindo</title>
+    <link rel="stylesheet" href="{% static 'welcome/css/welcome.css' %}">
+</head>
+<body>
+    <!-- Barra superior no mesmo tema visual do portal. -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="/welcome/">MINHAS FINANCAS</a>
+            <span class="tag">Area Inicial</span>
+        </div>
+    </header>
+
+    <main class="welcome-shell">
+        <section class="welcome-card">
+            <h1>Seja bem vindo</h1>
+            <p>Login realizado com sucesso.</p>
+            <p>Seu painel de financas sera construido aqui.</p>
+
+            <!-- Link para logout mantendo o fluxo simples do MVP. -->
+            <a class="logout-link" href="/accounts/logout/">Sair</a>
+        </section>
+    </main>
+</body>
+</html>

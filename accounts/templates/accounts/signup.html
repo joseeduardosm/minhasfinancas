@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Usuario | Minhas Financas</title>
+    <link rel="stylesheet" href="{% static 'accounts/css/signup.css' %}">
+</head>
+<body>
+    <!-- Barra superior inspirada no visual do Yu-Gi-Oh DB. -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <strong class="brand">MINHAS FINANCAS</strong>
+            <span class="tag">Criacao de Conta</span>
+        </div>
+    </header>
+
+    <main class="signup-shell">
+        <section class="signup-card">
+            <h1>Novo Usuario</h1>
+            <p class="subtitle">Monte sua conta para entrar na arena financeira.</p>
+
+            <!-- Formulario de cadastro local do Django. -->
+            <form method="post" class="signup-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="error-box">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                {% for field in form %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="error-box">{{ field.errors }}</div>
+                    {% endif %}
+                {% endfor %}
+
+                <button type="submit" class="btn-primary">Criar conta</button>
+            </form>
+
+            <p class="login-tip">
+                Ja tem conta?
+                <a href="{% url 'accounts:login' %}">Voltar para login</a>
+            </p>
+        </section>
+    </main>
+</body>
+</html>

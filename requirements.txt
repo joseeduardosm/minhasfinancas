@@ -1,0 +1,14 @@
+# Framework web principal
+Django==6.0.3
+
+# Driver MySQL para integracao Django + MySQL
+mysqlclient==2.2.8
+
+# Utilitario para carregar variaveis de ambiente
+python-dotenv==1.2.2
+
+# Servidor WSGI para producao
+gunicorn==25.3.0
+
+# Servir arquivos estaticos com Gunicorn
+whitenoise==6.12.0

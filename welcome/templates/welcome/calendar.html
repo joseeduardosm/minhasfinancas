@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario | Minhas Financas</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
+    <link rel="stylesheet" href="{% static 'welcome/css/calendar.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="/welcome/">MINHAS FINANCAS</a>
+            <a class="back-link" href="/welcome/?year={{ year }}&month={{ month }}">Voltar para dashboard</a>
+        </div>
+    </header>
+
+    <main class="calendar-shell">
+        {% if messages %}
+            <section class="messages-wrap">
+                {% for message in messages %}
+                    <div class="msg {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </section>
+        {% endif %}
+
+        <section class="calendar-card">
+            <div class="calendar-head">
+                <h1>Eventos Financeiros</h1>
+                <div class="month-nav">
+                    <a href="?year={{ prev_year }}&month={{ prev_month }}">&lsaquo; Mes anterior</a>
+                    <strong>{{ month|stringformat:"02d" }}/{{ year }}</strong>
+                    <a href="?year={{ next_year }}&month={{ next_month }}">Proximo mes &rsaquo;</a>
+                </div>
+            </div>
+
+            <div id="calendar"></div>
+            <div id="event-tooltip" class="event-tooltip" hidden></div>
+            <div id="event-actions" class="event-actions" hidden>
+                <p id="event-actions-title" class="event-actions-title"></p>
+                <div class="event-actions-buttons">
+                    <a id="event-edit-link" class="event-btn event-btn-edit" href="#">Editar</a>
+                    <button id="event-execute-btn" class="event-btn event-btn-run" type="button">Executar</button>
+                </div>
+            </div>
+
+            <form id="event-execute-form" method="post" hidden>
+                {% csrf_token %}
+                <input type="hidden" name="year" value="{{ year }}">
+                <input type="hidden" name="month" value="{{ month }}">
+                <input id="event-execute-day" type="hidden" name="day" value="{{ selected_day|default:'' }}">
+            </form>
+        </section>
+    </main>
+
+    {{ dados|json_script:"monthly-data" }}
+    {{ selected_day|json_script:"selected-day" }}
+    <script src="{% static 'welcome/js/calendar.js' %}"></script>
+</body>
+</html>
